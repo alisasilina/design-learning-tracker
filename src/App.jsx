@@ -60,7 +60,6 @@ const PLAN = { weeks: [
         why:"Variables replaced styles in 2023. Every modern Figma workflow depends on them. This is the single biggest gap to close.",
         goal:"Understand why variables beat styles, and build your first color system.",
         estimatedTime:"2-2.5 hrs", skills:["variables"],
-        reflectionPrompt:"Could you explain the difference between primitive and semantic tokens to a junior designer?",
         resources:[
           { label:"Figma Official: Guide to Variables", url:"https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma", type:"docs", time:"20 min" },
           { label:"YouTube: Variables Intro (Figma, 14 min)", url:"https://www.youtube.com/watch?v=1ONxxlJnvdM", type:"video", time:"14 min" },
@@ -81,7 +80,6 @@ const PLAN = { weeks: [
         why:"A complete token system covers more than color. Spacing and radius tokens let you resize your entire UI from one place.",
         goal:"Build a complete token system including spacing, radius, and a dark mode.",
         estimatedTime:"2-2.5 hrs", skills:["variables"],
-        reflectionPrompt:"What would break in your token system if you removed the semantic layer?",
         resources:[
           { label:"YouTube: Variables for Spacing and Sizing", url:"https://www.youtube.com/watch?v=P5g6JBGkBMQ", type:"video", time:"18 min" },
           { label:"Figma Docs: Modes section", url:"https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma", type:"docs", time:"10 min" },
@@ -99,7 +97,6 @@ const PLAN = { weeks: [
         why:"Your components exist but variants and properties are underused. This makes your library fragile and hard to scale.",
         goal:"Learn how to think about components before building them.",
         estimatedTime:"2-2.5 hrs", skills:["components"],
-        reflectionPrompt:"What is the difference between a component property and a variant? When would you use each?",
         resources:[
           { label:"YouTube: Component Properties Deep Dive", url:"https://www.youtube.com/watch?v=k74IrUNaJVk", type:"video", time:"20 min" },
           { label:"Figma: Building Component Libraries", url:"https://www.figma.com/best-practices/building-and-using-component-libraries/", type:"docs", time:"15 min" },
@@ -119,7 +116,6 @@ const PLAN = { weeks: [
         why:"Variants let you encode all component states in one place. Without them, designers duplicate frames and engineers miss states.",
         goal:"Build multi-state, multi-variant components properly.",
         estimatedTime:"2-2.5 hrs", skills:["components"],
-        reflectionPrompt:"What is the matrix trap, and how did you avoid it today?",
         resources:[
           { label:"YouTube: Variants Masterclass (18 min)", url:"https://www.youtube.com/watch?v=y29Xwt9dET0", type:"video", time:"18 min" },
           { label:"Figma Docs: Create and Use Variants", url:"https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants", type:"docs", time:"10 min" },
@@ -138,7 +134,6 @@ const PLAN = { weeks: [
         why:"You have solid spatial instincts. Closing the wrap, absolute positioning, and fill container gaps makes you truly fluent.",
         goal:"Identify and close your Auto Layout knowledge gaps.",
         estimatedTime:"2 hrs", skills:["autolayout"],
-        reflectionPrompt:"Where in your past work would absolute positioning inside Auto Layout have saved you the most time?",
         resources:[
           { label:"Figma Docs: Auto Layout", url:"https://help.figma.com/hc/en-us/articles/360040451373", type:"docs", time:"20 min" },
         ],
@@ -154,7 +149,6 @@ const PLAN = { weeks: [
         why:"Engineers are missing structured specs from your files right now. Dev Mode fixes this in an afternoon.",
         goal:"Learn Dev Mode so engineers never need to ask questions.",
         estimatedTime:"2 hrs", skills:["devmode"],
-        reflectionPrompt:"What information was missing from your previous handoff files that Dev Mode would have provided?",
         resources:[
           { label:"YouTube: Dev Mode Overview (Figma, 2024)", url:"https://www.youtube.com/watch?v=LoMNKrv2RJc", type:"video", time:"22 min" },
           { label:"Figma Docs: Guide to Dev Mode", url:"https://help.figma.com/hc/en-us/articles/15023124644247-Guide-to-Dev-Mode", type:"docs", time:"15 min" },
@@ -172,7 +166,6 @@ const PLAN = { weeks: [
         why:"Consolidation is part of learning. The gaps you find today prevent bad habits from embedding.",
         goal:"Review Week 1. Fix gaps. Write your reflection.",
         estimatedTime:"1 hr", skills:["variables","components"],
-        reflectionPrompt:"If you had to teach someone the single most important thing you learned this week, what would it be?",
         resources:[],
         tasks:[
           { id:"w1d7t1", label:"Review all Week 1 Figma files", phase:"learn" },
@@ -192,7 +185,6 @@ const PLAN = { weeks: [
         why:"You have never built a design system from scratch. This is the single most asked-about skill in senior designer interviews.",
         goal:"Learn how real design systems are structured before touching Figma.",
         estimatedTime:"2 hrs", skills:["designsystems"],
-        reflectionPrompt:"What 3 design principles would define your system, and why those three?",
         resources:[
           { label:"designsystems.com", url:"https://www.designsystems.com/", type:"article", time:"20 min" },
           { label:"Study: Material Design 3", url:"https://m3.material.io/", type:"reference", time:"20 min" },
@@ -211,7 +203,6 @@ const PLAN = { weeks: [
         why:"Typography is the first thing that makes a design system feel polished or amateur.",
         goal:"Build a type scale using variables and styles together.",
         estimatedTime:"2 hrs", skills:["designsystems"],
-        reflectionPrompt:"How does your type scale handle the jump from body text to a dashboard display number?",
         resources:[
           { label:"YouTube: Typography in Figma Systems (2024)", url:"https://www.youtube.com/watch?v=KSSQ6RKqHKs", type:"video", time:"18 min" },
           { label:"typescale.com - generate your scale", url:"https://typescale.com/", type:"tool", time:"10 min" },
@@ -229,7 +220,6 @@ const PLAN = { weeks: [
         why:"Atoms are the building blocks. Get these right and every molecule and organism inherits their quality.",
         goal:"Build core atom components using your design system tokens.",
         estimatedTime:"2.5-3 hrs", skills:["components","variables"],
-        reflectionPrompt:"Which atom was hardest to structure? What did that teach you?",
         resources:[],
         tasks:[
           { id:"w2d3t1", label:"Build Badge (3 colors, 2 sizes)", phase:"practice" },
@@ -244,7 +234,6 @@ const PLAN = { weeks: [
         why:"Molecules prove your atoms work. If composition breaks here, your token or variant structure is wrong.",
         goal:"Build molecule components by composing atoms.",
         estimatedTime:"2.5-3 hrs", skills:["components"],
-        reflectionPrompt:"Where did you find yourself reaching for a new component instead of composing existing atoms?",
         resources:[],
         tasks:[
           { id:"w2d4t1", label:"Build Form field (label + input + error message)", phase:"practice" },
@@ -259,7 +248,6 @@ const PLAN = { weeks: [
         why:"Documentation is what separates a design system from a component library. It's also what interviewers look for.",
         goal:"Document your system inside Figma.",
         estimatedTime:"2 hrs", skills:["designsystems","uxwriting"],
-        reflectionPrompt:"What would a new designer on your team need to understand to use your system confidently?",
         resources:[
           { label:"Atlassian: How they document components", url:"https://atlassian.design/components/button/usage", type:"reference", time:"15 min" },
         ],
@@ -276,7 +264,6 @@ const PLAN = { weeks: [
         why:"Accessibility is not optional. AA contrast failures block promotions and portfolio reviews at good companies.",
         goal:"Make your design system accessible.",
         estimatedTime:"2 hrs", skills:["designsystems"],
-        reflectionPrompt:"Which of your components failed the contrast check, and what did you change?",
         resources:[
           { label:"Figma Accessibility Resources", url:"https://www.figma.com/accessibility/", type:"docs", time:"15 min" },
           { label:"WebAIM Contrast Checker", url:"https://webaim.org/resources/contrastchecker/", type:"tool", time:"10 min" },
@@ -294,7 +281,6 @@ const PLAN = { weeks: [
         why:"This is the moment your work becomes a portfolio piece. Treat the README like a product brief.",
         goal:"Write the Design System README and finalize Portfolio Piece #1.",
         estimatedTime:"1 hr", skills:["designsystems","uxwriting"],
-        reflectionPrompt:"How would you present this design system in a 10-minute interview walkthrough?",
         resources:[],
         tasks:[
           { id:"w2d7t1", label:"Write the Design System README inside Figma", phase:"learn" },
@@ -314,7 +300,6 @@ const PLAN = { weeks: [
         why:"AI is now table stakes in 2025-2026. Not knowing what Figma AI can do is a visible gap in interviews.",
         goal:"Know what Figma AI can actually do right now.",
         estimatedTime:"2-2.5 hrs", skills:["figmaai"],
-        reflectionPrompt:"Which Figma AI feature saved the most time? Which was disappointing?",
         resources:[
           { label:"Figma AI - official overview", url:"https://www.figma.com/ai/", type:"docs", time:"20 min" },
           { label:"Figma Help: Figma AI Overview", url:"https://help.figma.com/hc/en-us/articles/23905654528791-Figma-AI-overview", type:"docs", time:"15 min" },
@@ -332,7 +317,6 @@ const PLAN = { weeks: [
         why:"Claude is the most useful AI tool for designers right now. Most designers do not know how to prompt it effectively.",
         goal:"Use Claude as a real design tool for copy and specs.",
         estimatedTime:"2 hrs", skills:["claude","uxwriting"],
-        reflectionPrompt:"What prompt produced the most useful output today? What would you change about how you asked?",
         resources:[
           { label:"Prompt Engineering Basics (Anthropic Docs)", url:"https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview", type:"docs", time:"20 min" },
         ],
@@ -349,7 +333,6 @@ const PLAN = { weeks: [
         why:"The fastest way to generate structural options is AI. Most designers spend too long on the first idea.",
         goal:"Use Claude and ChatGPT to generate and compare UI direction ideas.",
         estimatedTime:"2 hrs", skills:["claude","figmaai"],
-        reflectionPrompt:"How did AI-generated structural options change which direction you chose?",
         resources:[],
         tasks:[
           { id:"w3d3t1", label:"Pick a B2B screen you know well (e.g. analytics dashboard)", phase:"learn" },
@@ -364,7 +347,6 @@ const PLAN = { weeks: [
         why:"You have theoretical UX knowledge but have not practiced on a real product. AI lets you simulate research without a user panel.",
         goal:"Learn to use AI for research synthesis.",
         estimatedTime:"2 hrs", skills:["claude","uxwriting"],
-        reflectionPrompt:"How reliable do you think the AI-generated user quotes felt? What would real data change?",
         resources:[
           { label:"NNGroup: AI for UX Research", url:"https://nngroup.com/articles/ai-ux-research/", type:"article", time:"15 min" },
         ],
@@ -381,7 +363,6 @@ const PLAN = { weeks: [
         why:"Jumping straight to UI is dangerous in interviews where process is evaluated. AI makes wireframing fast enough to stop skipping it.",
         goal:"Use AI to escape the straight-to-UI trap.",
         estimatedTime:"2 hrs", skills:["claude","figmaai"],
-        reflectionPrompt:"How did starting with a text-based flow change the quality of your wireframe decisions?",
         resources:[
           { label:"AI Wireframing 2024 - Tools and Workflow", url:"https://uxdesign.cc/ai-wireframing-2024-tools-and-workflow", type:"article", time:"12 min" },
         ],
@@ -399,7 +380,6 @@ const PLAN = { weeks: [
         why:"Figma MCP is the next frontier of AI-assisted design. Being able to talk about it in 2025-2026 signals senior awareness.",
         goal:"Understand what Figma MCP is and run your first real workflow.",
         estimatedTime:"2 hrs", skills:["figmaai","claude"],
-        reflectionPrompt:"What Figma workflow would benefit most from MCP integration in your current project?",
         resources:[
           { label:"Figma MCP - official documentation", url:"https://www.figma.com/developers/mcp", type:"docs", time:"20 min" },
           { label:"MCP: Introduction (Model Context Protocol)", url:"https://modelcontextprotocol.io/introduction", type:"docs", time:"15 min" },
@@ -418,7 +398,6 @@ const PLAN = { weeks: [
         why:"This project synthesizes everything from Week 3. It should feel like a real design process, not a homework exercise.",
         goal:"Build the AI-Assisted Feature Design and update your portfolio.",
         estimatedTime:"1 hr", skills:["claude","figmaai","uxwriting"],
-        reflectionPrompt:"How will you describe your AI workflow in a portfolio walkthrough?",
         resources:[],
         tasks:[
           { id:"w3d7t1", label:"Review all AI experiments from the week", phase:"learn" },
@@ -438,7 +417,6 @@ const PLAN = { weeks: [
         why:"Most designers present static screens. A prototype that runs like a real product makes you stand out immediately.",
         goal:"Build prototypes that feel like real products, not clickable wireframes.",
         estimatedTime:"2-2.5 hrs", skills:["prototyping","variables"],
-        reflectionPrompt:"How would you explain variable-driven prototyping to an engineer who thinks Figma prototypes are just mockups?",
         resources:[
           { label:"Figma Docs: Variables in Prototyping", url:"https://help.figma.com/hc/en-us/articles/14506587589399-Variables-in-prototyping", type:"docs", time:"15 min" },
           { label:"YouTube: Variables Prototyping Walkthrough", url:"https://www.youtube.com/watch?v=RlMiD5OgRaE", type:"video", time:"20 min" },
@@ -456,7 +434,6 @@ const PLAN = { weeks: [
         why:"This is portfolio material. Complex prototypes are remembered in interviews because almost no one brings them.",
         goal:"Prototype something complex enough to show in an interview.",
         estimatedTime:"2.5-3 hrs", skills:["prototyping"],
-        reflectionPrompt:"What would an engineer think if they saw this prototype? What questions would they ask you?",
         resources:[],
         tasks:[
           { id:"w4d2t1", label:"Choose: multi-step form OR sortable table OR sidebar nav with collapse", phase:"practice" },
@@ -471,7 +448,6 @@ const PLAN = { weeks: [
         why:"Vibe coding makes you a more fluent collaborator with engineers. It also lets you prototype interactions Figma cannot do.",
         goal:"Understand vibe coding and run your first Claude session.",
         estimatedTime:"2 hrs", skills:["vibecoding","claude"],
-        reflectionPrompt:"What surprised you most about what Claude built without you writing a single line of code?",
         resources:[
           { label:"Claude Artifacts as a Design Tool", url:"https://www.anthropic.com/news/claude-and-artifacts", type:"article", time:"10 min" },
         ],
@@ -488,7 +464,6 @@ const PLAN = { weeks: [
         why:"Building something from your actual Figma files teaches you how engineers read your specs - and what they miss.",
         goal:"Build something complex enough to understand its implementation cost.",
         estimatedTime:"2.5-3 hrs", skills:["vibecoding","devmode"],
-        reflectionPrompt:"What did Claude get wrong about your design that your Figma spec should have made clearer?",
         resources:[],
         tasks:[
           { id:"w4d4t1", label:"Pick a real screen from your past work", phase:"practice" },
@@ -504,7 +479,6 @@ const PLAN = { weeks: [
         why:"The gap between junior and senior is not craft - it is the ability to articulate why a decision is right or wrong.",
         goal:"Evaluate your own work the way interviewers and design leads do.",
         estimatedTime:"2 hrs", skills:["designsystems","uxwriting"],
-        reflectionPrompt:"Which lens was hardest to apply to your own work, and what does that tell you?",
         resources:[
           { label:"NNGroup: How to Run a Proper Critique", url:"https://www.nngroup.com/articles/design-critique/", type:"article", time:"12 min" },
           { label:"How to Critique Design Like a Senior Designer", url:"https://medium.com/design-leadership/how-to-critique-design-like-a-senior-designer", type:"article", time:"10 min" },
@@ -524,7 +498,6 @@ const PLAN = { weeks: [
         why:"Everything you have built is only useful if you can talk about it clearly. This session turns practice into performance.",
         goal:"Be able to talk about everything you built with confidence.",
         estimatedTime:"2.5-3 hrs", skills:["designsystems","uxwriting","devmode"],
-        reflectionPrompt:"Which interview question felt most natural to answer? Which still feels weak?",
         resources:[],
         tasks:[
           { id:"w4d6t1", label:"Part 1: Mock interview with Claude - 8 questions with feedback (60 min)", phase:"learn" },
@@ -540,7 +513,6 @@ const PLAN = { weeks: [
         why:"Rest is part of learning. Your brain consolidates everything while you are not working.",
         goal:"Four weeks done. You earned it.",
         estimatedTime:"-", skills:[],
-        reflectionPrompt:"What is the one skill you are most proud of having built in these 4 weeks?",
         resources:[],
         tasks:[
           { id:"w4d7t1", label:"Confirm: token-based design system with components, variants, dark mode", phase:"practice" },
@@ -847,24 +819,16 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
           </div>
         </TaskSection>
 
-        {/* Reflection */}
+        {/* Notes */}
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <div className="text-sm font-semibold text-gray-700 mb-1">Step 4 - Reflect</div>
-          <p className="text-xs text-gray-400 mb-3 italic">"{today.reflectionPrompt}"</p>
-          <div className="grid grid-cols-1 gap-3">
-            {[["learned","What I learned today"],["confusing","What was confusing"],["revisit","What I want to revisit"],["figmaLink","Link to my Figma file / output"]].map(([field, placeholder])=>(
-              <div key={field}>
-                <label className="text-xs text-gray-400 block mb-1">{placeholder}</label>
-                <textarea
-                  value={(notes[today.id]||{})[field]||""}
-                  onChange={e=>onNote(today.id, field, e.target.value)}
-                  placeholder={placeholder+"..."}
-                  rows={field==="figmaLink"?1:2}
-                  className="w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-300"
-                />
-              </div>
-            ))}
-          </div>
+          <div className="text-sm font-semibold text-gray-700 mb-3">Notes</div>
+          <textarea
+            value={notes[today.id]||""}
+            onChange={e=>onNote(today.id, e.target.value)}
+            placeholder="Notes, questions, or anything worth remembering from today..."
+            rows={4}
+            className="w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-300"
+          />
         </div>
 
         {/* Complete button */}
@@ -1275,9 +1239,8 @@ export default function App() {
     if (!next.startedDate) next.startedDate = d;
     persist(next);
   }
-  function setNote(dayId, field, value) {
-    const dayNotes = {...(notes[dayId]||{}), [field]:value};
-    persist({...state, notes:{...notes, [dayId]:dayNotes}});
+  function setNote(dayId, value) {
+    persist({...state, notes:{...notes, [dayId]:value}});
   }
   function setResourceStatus(key, status) {
     persist({...state, resourceStatus:{...(state.resourceStatus||{}), [key]:status}});
