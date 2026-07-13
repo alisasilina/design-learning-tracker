@@ -673,8 +673,8 @@ function load() {
   catch { return defaultState(); }
 }
 function defaultState() {
-  return { checked:{}, notes:{}, resourceStatus:{}, sessionActive:null,
-           streak:0, lastActiveDate:null, startedDate:null };
+  return { checked:{}, notes:{}, resourceStatus:{},
+           streak:0, lastActiveDate:null, lastViewedLessonId:null };
 }
 function save(s) { try { localStorage.setItem(LS, JSON.stringify(s)); } catch {} }
 
@@ -685,9 +685,18 @@ const skillTasks = (skillId) => { const s = PLAN.skills.find(x=>x.skillId===skil
 const lessonDone = (lesson, checked) => lesson.tasks.length>0 && lesson.tasks.every(t=>checked[t.id]);
 const lessonProgress = (lesson, checked) => lesson.tasks.length===0?0:lesson.tasks.filter(t=>checked[t.id]).length/lesson.tasks.length;
 
-function currentLesson(checked) {
+function continueLesson(checked, lastViewedLessonId) {
   const lessons = allLessons();
-  return lessons.find(l => !lessonDone(l,checked)) || lessons[lessons.length-1];
+  if (lastViewedLessonId) {
+    const viewed = lessons.find(l=>l.id===lastViewedLessonId);
+    if (viewed) return viewed;
+  }
+  return lessons.find(l => !lessonDone(l,checked)) || lessons[0];
+}
+function firstIncompleteLessonInSkill(skillId, checked) {
+  const s = PLAN.skills.find(x=>x.skillId===skillId);
+  if (!s) return null;
+  return s.lessons.find(l=>!lessonDone(l,checked)) || s.lessons[0];
 }
 function computeStreak(checked) {
   const lessons = allLessons();
@@ -715,10 +724,6 @@ function deliverablesDone(checked) {
     return lesson && lessonDone(lesson, checked);
   });
 }
-function todayStr() {
-  return new Date().toISOString().split("T")[0];
-}
-
 // ─── ICONS ───────────────────────────────────────────────────────────────────
 const Ic = {
   Check: ({cls=""}) => <svg viewBox="0 0 20 20" fill="none" className={cls||"w-4 h-4"}><path d="M4 10l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
@@ -778,19 +783,19 @@ function Checkbox({checked, onChange, size="w-5 h-5"}) {
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id:"today", label:"Today", Icon:Ic.Play },
+  { id:"continue", label:"Continue", Icon:Ic.Play },
   { id:"journey", label:"Journey", Icon:Ic.Map },
   { id:"skills", label:"Skills", Icon:Ic.Skill },
   { id:"portfolio", label:"Portfolio", Icon:Ic.Folder },
   { id:"resources", label:"Resources", Icon:Ic.Book },
 ];
 
-function Sidebar({active, setActive, checked}) {
+function Sidebar({active, setActive, checked, lastViewedLessonId}) {
   const streak = computeStreak(checked);
   const total = allTasks().length;
   const done = allTasks().filter(t=>checked[t.id]).length;
   const pct = total>0?Math.round(done/total*100):0;
-  const today = currentLesson(checked);
+  const today = continueLesson(checked, lastViewedLessonId);
   const todaySkill = PLAN.skills.find(s=>s.skillId===today?.skillId);
   return (
     <aside className="w-56 flex-shrink-0 bg-[#1e1b4b] text-white flex flex-col h-screen sticky top-0">
@@ -829,9 +834,9 @@ function Sidebar({active, setActive, checked}) {
   );
 }
 
-// ─── TODAY VIEW ───────────────────────────────────────────────────────────────
-function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onEndSession, sessionActive}) {
-  const today = currentLesson(checked);
+// ─── CONTINUE / LESSON VIEW ───────────────────────────────────────────────────
+function ContinueView({checked, notes, onToggle, onNote, lesson, lessonOrigin, onOpenSkill, onOpenLesson, onBackToSkills}) {
+  const today = lesson;
   const skill = PLAN.skills.find(s=>s.skillId===today?.skillId);
   if (!today||!skill) return <div className="p-8 text-gray-400">All done!</div>;
 
@@ -842,6 +847,16 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
   const streak = computeStreak(checked);
   const skillColor = skill.color;
   const lessonIndex = skill.lessons.findIndex(l=>l.id===today.id);
+  const skillIndex = PLAN.skills.findIndex(s=>s.skillId===skill.skillId);
+
+  const isLessonMode = !!lessonOrigin;
+  const originSkill = isLessonMode ? PLAN.skills.find(s=>s.skillId===lessonOrigin) : null;
+  const originIndex = originSkill ? originSkill.lessons.findIndex(l=>l.id===today.id) : -1;
+  const prevLesson = originSkill && originIndex>0 ? originSkill.lessons[originIndex-1] : null;
+  const nextLesson = originSkill && originIndex>=0 && originIndex<originSkill.lessons.length-1 ? originSkill.lessons[originIndex+1] : null;
+
+  const [started, setStarted] = useState(false);
+  useEffect(()=>{ setStarted(false); }, [today.id]);
 
   const learnTasks = today.tasks.filter(t=>t.phase==="learn");
   const practiceTasks = today.tasks.filter(t=>t.phase==="practice");
@@ -855,11 +870,21 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
         <div className="rounded-2xl overflow-hidden bg-[#fffffe] border border-[#efe9e0] shadow-sm">
           <div className="h-1.5" style={{background:`linear-gradient(90deg, ${skill.color}, ${skill.color}55)`}}/>
           <div className="p-6">
+            {isLessonMode && originSkill && (
+              <button onClick={()=>onBackToSkills(originSkill.skillId)} className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-indigo-600 transition-colors mb-2">
+                <Ic.Chevron cls="w-3 h-3 rotate-180"/> Back to {originSkill.title}
+              </button>
+            )}
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{color:skill.color}}>{skill.title} - Lesson {lessonIndex+1} of {skill.lessons.length}</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{color:skill.color}}>
+                {isLessonMode ? `${skill.title} — Lesson ${lessonIndex+1} of ${skill.lessons.length}` : "Continue where you left off"}
+              </span>
               {skill.tier===3 && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Advanced</span>}
             </div>
             <h1 className="text-3xl font-extrabold text-gray-900 leading-tight">{today.title}</h1>
+            {!isLessonMode && (
+              <div className="mt-1 text-xs text-gray-400">Skill {skillIndex+1} of {PLAN.skills.length} — Lesson {lessonIndex+1} of {skill.lessons.length}</div>
+            )}
             <div className="mt-3 max-w-xl rounded-xl bg-indigo-50/50 border-l-4 px-4 py-3" style={{borderColor:skill.color}}>
               <p className="text-gray-600 leading-relaxed text-sm">{today.why}</p>
             </div>
@@ -877,7 +902,7 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
           </div>
         </div>
 
-        {/* Session progress bar */}
+        {/* Lesson progress bar */}
         <div className="bg-[#fffffe] rounded-2xl border border-[#efe9e0] shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-gray-700">Lesson progress</span>
@@ -888,9 +913,9 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
           </div>
           <Bar value={pct} color={pct===100?"linear-gradient(90deg,#34d399,#10b981)":"linear-gradient(90deg,#818cf8,#8b5cf6)"} h="h-2.5"/>
           <div className="mt-2 text-xs text-gray-400">{done} of {total} tasks</div>
-          {!isLessonDone && !sessionActive && (
-            <button onClick={onStartSession} className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
-              <Ic.Play/>Start this lesson
+          {!isLessonDone && !started && (
+            <button onClick={()=>setStarted(true)} className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
+              <Ic.Play/>Open this lesson
             </button>
           )}
           {isLessonDone && (
@@ -923,7 +948,7 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
         {/* Step 3: Deliver */}
         <TaskSection title="03 - Deliver" subtitle="Create the output" tasks={deliverTasks} checked={checked} onToggle={onToggle} color={skillColor} tint="emerald">
           <div className="mt-3 p-3 bg-[#fffffe] rounded-xl border border-emerald-200 shadow-sm">
-            <div className="text-xs font-semibold text-emerald-700 mb-1 uppercase tracking-wide">Today's deliverable</div>
+            <div className="text-xs font-semibold text-emerald-700 mb-1 uppercase tracking-wide">This lesson's deliverable</div>
             <p className="text-sm text-emerald-900">{today.deliverable}</p>
           </div>
         </TaskSection>
@@ -942,17 +967,34 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
 
         {/* Complete button */}
         {!isLessonDone && (
-          <div className="text-center pb-8">
+          <div className="text-center pb-4">
             <div className="text-xs text-gray-400 mb-3">Finish all tasks above to mark this lesson complete</div>
             <button
               disabled={pct<100}
               onClick={()=>{
                 today.tasks.forEach(t=>{if(!checked[t.id])onToggle(t.id);});
-                onEndSession();
               }}
               className={"px-8 py-3 rounded-xl text-sm font-semibold transition-all "+(pct===100?"bg-emerald-500 hover:bg-emerald-600 text-white":"bg-gray-100 text-gray-400 cursor-not-allowed")}>
               {pct===100?"Mark lesson complete!":"Complete all tasks first"}
             </button>
+          </div>
+        )}
+
+        {/* Previous / Next lesson nav (within the same skill, when browsing from Skills) */}
+        {isLessonMode && originSkill && (prevLesson || nextLesson) && (
+          <div className="flex items-center justify-between gap-3 pb-8 pt-2 border-t border-[#efe9e0]">
+            {prevLesson ? (
+              <button onClick={()=>onOpenLesson(prevLesson.id, originSkill.skillId)} className="flex-1 text-left px-4 py-3 rounded-xl border border-[#efe9e0] bg-[#fffffe] hover:border-indigo-200 hover:shadow-sm transition-all">
+                <div className="text-xs text-gray-400 mb-0.5 flex items-center gap-1"><Ic.Chevron cls="w-3 h-3 rotate-180"/> Previous</div>
+                <div className="text-sm font-semibold text-gray-800 truncate">{prevLesson.title}</div>
+              </button>
+            ) : <div className="flex-1"/>}
+            {nextLesson ? (
+              <button onClick={()=>onOpenLesson(nextLesson.id, originSkill.skillId)} className="flex-1 text-right px-4 py-3 rounded-xl border border-[#efe9e0] bg-[#fffffe] hover:border-indigo-200 hover:shadow-sm transition-all">
+                <div className="text-xs text-gray-400 mb-0.5 flex items-center justify-end gap-1">Next <Ic.Chevron cls="w-3 h-3"/></div>
+                <div className="text-sm font-semibold text-gray-800 truncate">{nextLesson.title}</div>
+              </button>
+            ) : <div className="flex-1"/>}
           </div>
         )}
       </div>
@@ -973,26 +1015,27 @@ function TodayView({checked, notes, onToggle, onNote, state, onStartSession, onE
           </div>
         </div>
 
-        {/* Skill map position */}
+        {/* All skills */}
         <div className="bg-[#fffffe] rounded-2xl border border-[#efe9e0] shadow-sm p-5">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Your journey</div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">All skills</div>
           <div className="space-y-2">
             {PLAN.skills.map(s => {
               const st = skillTasks(s.skillId);
               const sd = st.filter(t=>checked[t.id]).length;
               const sp = st.length>0?Math.round(sd/st.length*100):0;
-              const isCurrent = s.skillId===skill.skillId;
+              const isActive = s.skillId===skill.skillId;
               return (
-                <div key={s.skillId} className={"rounded-xl p-3 transition-all "+(isCurrent?"border-2 bg-indigo-50":"border border-gray-100")+(isCurrent?" border-indigo-300":"")}>
+                <button key={s.skillId} onClick={()=>onOpenSkill(s.skillId)}
+                  className={"w-full text-left rounded-xl p-3 transition-all "+(isActive?"border-2 bg-indigo-50 border-indigo-300":"border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/40")}>
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{background:s.color}}/>
-                      <span className={"text-xs font-semibold "+(isCurrent?"text-indigo-700":"text-gray-500")}>{s.title}</span>
+                      <span className={"text-xs font-semibold "+(isActive?"text-indigo-700":"text-gray-500")}>{s.title}</span>
                     </div>
                     <span className="text-xs text-gray-400">{sp}%</span>
                   </div>
                   <Bar value={sp} color={s.color} h="h-1"/>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -1081,8 +1124,8 @@ function NextMilestone({checked}) {
 }
 
 // ─── JOURNEY VIEW ─────────────────────────────────────────────────────────────
-function JourneyView({checked, setViewAndDay}) {
-  const today = currentLesson(checked);
+function JourneyView({checked, lastViewedLessonId, onOpenLesson}) {
+  const today = continueLesson(checked, lastViewedLessonId);
   return (
     <div className="p-8 max-w-4xl bg-[#faf9f7] min-h-screen">
       <div className="mb-8">
@@ -1123,7 +1166,7 @@ function JourneyView({checked, setViewAndDay}) {
                     const lp = lessonProgress(lesson,checked);
                     const lDone = lesson.tasks.filter(t=>checked[t.id]).length;
                     return (
-                      <button key={lesson.id} onClick={()=>setViewAndDay(lesson.id)}
+                      <button key={lesson.id} onClick={()=>onOpenLesson(lesson.id, skill.skillId)}
                         className={"relative w-full text-left rounded-2xl px-4 py-3.5 border transition-all group "+(isToday?"border-transparent border-l-4 bg-indigo-50/50 shadow-sm":done?"border-emerald-200 bg-emerald-50":"border-[#efe9e0] bg-[#fffffe] hover:border-indigo-200 hover:shadow-sm")}
                         style={isToday?{borderLeftColor:skill.color}:undefined}>
                         <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center"
@@ -1162,7 +1205,7 @@ function JourneyView({checked, setViewAndDay}) {
 }
 
 // ─── SKILLS VIEW ──────────────────────────────────────────────────────────────
-function SkillsView({checked}) {
+function SkillsView({checked, expandedSkillId, onToggleSkill, onOpenLesson}) {
   const scores = skillProgress(checked);
   const sorted = Object.entries(scores).sort((a,b)=>b[1].done/Math.max(b[1].total,1)-a[1].done/Math.max(a[1].total,1));
   const strongest = sorted[0];
@@ -1199,19 +1242,45 @@ function SkillsView({checked}) {
         {Object.entries(SKILL_MAP).map(([key,{label,color}])=>{
           const s = scores[key]||{done:0,total:0};
           const p = s.total>0?Math.round(s.done/s.total*100):0;
+          const isOpen = expandedSkillId===key;
+          const skillObj = PLAN.skills.find(sk=>sk.skillId===key);
           return (
-            <div key={key} className="bg-[#fffffe] rounded-2xl border border-[#efe9e0] shadow-sm p-5 flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <ProgressRing value={p} size={56} stroke={5} color={color}/>
-                <div className="text-center -mt-10 text-xs font-bold" style={{color}}>{p}%</div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-gray-800 mb-1">{label}</div>
-                <div className="text-xs text-gray-400">{s.done} of {s.total} tasks done</div>
-                {p===100 && <div className="mt-1 text-xs text-emerald-600 font-medium">Mastered</div>}
-                {p>0 && p<100 && <div className="mt-1 text-xs text-indigo-500 font-medium">In progress</div>}
-                {p===0 && s.total>0 && <div className="mt-1 text-xs text-gray-400">Not started</div>}
-              </div>
+            <div key={key} className={isOpen?"md:col-span-2":""}>
+              <button onClick={()=>onToggleSkill(isOpen?null:key)} className="w-full text-left bg-[#fffffe] rounded-2xl border border-[#efe9e0] shadow-sm p-5 flex items-center gap-4 hover:border-indigo-200 transition-all">
+                <div className="flex-shrink-0">
+                  <ProgressRing value={p} size={56} stroke={5} color={color}/>
+                  <div className="text-center -mt-10 text-xs font-bold" style={{color}}>{p}%</div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-gray-800 mb-1">{label}</div>
+                  <div className="text-xs text-gray-400">{s.done} of {s.total} tasks done</div>
+                  {p===100 && <div className="mt-1 text-xs text-emerald-600 font-medium">Mastered</div>}
+                  {p>0 && p<100 && <div className="mt-1 text-xs text-indigo-500 font-medium">In progress</div>}
+                  {p===0 && s.total>0 && <div className="mt-1 text-xs text-gray-400">Not started</div>}
+                </div>
+                <span className={"text-gray-300 flex-shrink-0 transition-transform "+(isOpen?"rotate-180":"")}><Ic.ChevronDown/></span>
+              </button>
+              {isOpen && skillObj && (
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {skillObj.lessons.map(lesson=>{
+                    const lp = lessonProgress(lesson, checked);
+                    const ld = lessonDone(lesson, checked);
+                    const lDone = lesson.tasks.filter(t=>checked[t.id]).length;
+                    return (
+                      <button key={lesson.id} onClick={()=>onOpenLesson(lesson.id, key)}
+                        className={"text-left p-4 rounded-2xl border shadow-sm transition-all "+(ld?"border-emerald-200 bg-emerald-50":"border-[#efe9e0] bg-[#fffffe] hover:border-indigo-200 hover:shadow-sm")}>
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <div className="text-sm font-semibold text-gray-800">{lesson.title}</div>
+                          <div className="text-xs text-gray-400 flex-shrink-0">{lesson.estimatedTime}</div>
+                        </div>
+                        <Bar value={lp*100} color={color} h="h-1"/>
+                        <div className="text-xs text-gray-400 mt-1">{lDone}/{lesson.tasks.length} tasks</div>
+                        <div className="text-xs text-gray-500 mt-2 leading-snug">{lesson.deliverable}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -1335,17 +1404,15 @@ function ResourcesView({state, onResourceStatus}) {
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [state, setState] = useState(load);
-  const [view, setView] = useState("today");
-  const [focusLessonId, setFocusLessonId] = useState(null);
+  const [view, setView] = useState("continue");
+  const [lessonOrigin, setLessonOrigin] = useState(null);
+  const [expandedSkillId, setExpandedSkillId] = useState(null);
   const { checked, notes } = state;
 
   const persist = useCallback(next=>{ setState(next); save(next); }, []);
 
   function toggleTask(id) {
-    const next = {...state, checked:{...checked, [id]:!checked[id]}};
-    const d = todayStr();
-    if (!next.startedDate) next.startedDate = d;
-    persist(next);
+    persist({...state, checked:{...checked, [id]:!checked[id]}});
   }
   function setNote(lessonId, value) {
     persist({...state, notes:{...notes, [lessonId]:value}});
@@ -1353,30 +1420,57 @@ export default function App() {
   function setResourceStatus(key, status) {
     persist({...state, resourceStatus:{...(state.resourceStatus||{}), [key]:status}});
   }
-  function setViewAndLesson(lessonId) {
-    setFocusLessonId(lessonId);
-    setView("today");
+
+  // Opens a specific lesson in the main panel. originSkillId set => "lesson mode"
+  // (back link + prev/next within that skill). null => plain "continue" framing.
+  function openLesson(lessonId, originSkillId=null) {
+    persist({...state, lastViewedLessonId:lessonId});
+    setLessonOrigin(originSkillId);
+    setView("continue");
+  }
+  function openSkill(skillId) {
+    const lesson = firstIncompleteLessonInSkill(skillId, checked);
+    if (lesson) openLesson(lesson.id, null);
+  }
+  function backToSkills(skillId) {
+    setExpandedSkillId(skillId);
+    setView("skills");
   }
 
-  // If a specific lesson is focused (from journey), override currentLesson
-  const today = focusLessonId ? allLessons().find(l=>l.id===focusLessonId)||currentLesson(checked) : currentLesson(checked);
+  const activeLesson = continueLesson(checked, state.lastViewedLessonId);
+
+  // Establish a canonical lastViewedLessonId as soon as one resolves, so it's
+  // persisted from the very first visit onward.
+  useEffect(()=>{
+    if (!state.lastViewedLessonId && activeLesson) {
+      persist({...state, lastViewedLessonId:activeLesson.id});
+    }
+  }, [state.lastViewedLessonId, activeLesson?.id]);
 
   return (
     <div className="flex bg-[#faf9f7] min-h-screen font-sans" style={{fontFamily:"system-ui,-apple-system,sans-serif"}}>
-      <Sidebar active={view} setActive={(v)=>{setView(v);setFocusLessonId(null);}} checked={checked}/>
+      <Sidebar active={view} setActive={(v)=>{setView(v); if(v==="continue") setLessonOrigin(null);}} checked={checked} lastViewedLessonId={state.lastViewedLessonId}/>
       <main className="flex-1 overflow-auto">
-        {view==="today" && (
-          <TodayView
+        {view==="continue" && (
+          <ContinueView
             checked={checked} notes={notes}
             onToggle={toggleTask} onNote={setNote}
-            state={state}
-            sessionActive={state.sessionActive}
-            onStartSession={()=>persist({...state, sessionActive:today?.id})}
-            onEndSession={()=>persist({...state, sessionActive:null})}
+            lesson={activeLesson}
+            lessonOrigin={lessonOrigin}
+            onOpenSkill={openSkill}
+            onOpenLesson={openLesson}
+            onBackToSkills={backToSkills}
           />
         )}
-        {view==="journey" && <JourneyView checked={checked} setViewAndDay={setViewAndLesson}/>}
-        {view==="skills" && <SkillsView checked={checked}/>}
+        {view==="journey" && <JourneyView checked={checked} lastViewedLessonId={state.lastViewedLessonId} onOpenLesson={openLesson}/>}
+        {view==="skills" && (
+          <SkillsView
+            checked={checked}
+            expandedSkillId={expandedSkillId}
+            onToggleSkill={setExpandedSkillId}
+            onOpenLesson={openLesson}
+          />
+        )}
         {view==="portfolio" && <PortfolioView checked={checked}/>}
         {view==="resources" && <ResourcesView state={state} onResourceStatus={setResourceStatus}/>}
       </main>
